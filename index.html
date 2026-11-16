@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kids Workbook Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7ff;
+      margin: 0;
+      padding: 30px 15px;
+      color: #26324b;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 18px #00000012;
+    }
+    h1 { color: #4257a5; text-align: center; }
+    p { text-align: center; }
+    label { display: block; margin-top: 18px; font-weight: bold; }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    select { border: 1px solid #ccc; }
+    button {
+      border: none;
+      background: #5268bd;
+      color: white;
+      cursor: pointer;
+      margin-top: 22px;
+    }
+    button:hover { background: #394d9b; }
+    #worksheet {
+      margin-top: 30px;
+      padding: 20px;
+      border: 2px dashed #aab5dc;
+      border-radius: 10px;
+      display: none;
+    }
+    .question { margin: 25px 0; }
+    .answer { border-bottom: 1px solid #555; height: 25px; }
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; }
+      .controls, .print-button { display: none; }
+      #worksheet { display: block !important; border: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>My Kids Workbook Generator</h1>
+    <p>Create simple learning activities for children!</p>
+
+    <div class="controls">
+      <label for="age">Choose child's age</label>
+      <select id="age">
+        <option>3–4 years</option>
+        <option>5–6 years</option>
+        <option>7–8 years</option>
+        <option>9–10 years</option>
+      </select>
+
+      <label for="subject">Choose a subject</label>
+      <select id="subject">
+        <option value="phonics">Phonics</option>
+        <option value="math">Math</option>
+        <option value="english">English</option>
+      </select>
+
+      <label for="activity">Choose an activity</label>
+      <select id="activity">
+        <option value="writing">Writing practice</option>
+        <option value="matching">Matching</option>
+        <option value="thinking">Thinking questions</option>
+      </select>
+
+      <button onclick="generateWorksheet()">Create My Worksheet</button>
+    </div>
+
+    <div id="worksheet">
+      <h2 id="worksheetTitle">My Learning Worksheet</h2>
+      <p id="worksheetInfo"></p>
+      <div id="questions"></div>
+      <button class="print-button" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <script>
+    function generateWorksheet() {
+      const age = document.getElementById("age").value;
+      const subject = document.getElementById("subject").value;
+      const activity = document.getElementById("activity").value;
+
+      const activities = {
+        phonics: {
+          writing: ["Write the letter A.", "Write a word that starts with B.", "Complete: C _ T."],
+          matching: ["Match A with Apple.", "Match B with Ball.", "Match C with Cat."],
+          thinking: ["What sound does A make?", "Name a word beginning with B.", "Which word starts with C: Cat or Dog?"]
+        },
+        math: {
+          writing: ["Write numbers from 1 to 10.", "Write the number after 5.", "Write the number before 9."],
+          matching: ["Match 1 with one star.", "Match 2 with two stars.", "Match 3 with three stars."],
+          thinking: ["What is 2 + 1?", "What is 5 - 2?", "Which is bigger: 4 or 7?"]
+        },
+        english: {
+          writing: ["Write your name.", "Write one sentence about a cat.", "Write three describing words."],
+          matching: ["Match happy with a smiling face.", "Match hot with the sun.", "Match cold with ice."],
+          thinking: ["Name three animals.", "What is your favourite colour?", "Make a sentence using the word 'book'."]
+        }
+      };
+
+      const names = {
+        phonics: "Phonics",
+        math: "Math",
+        english: "English"
+      };
+
+      document.getElementById("worksheetTitle").textContent =
+        names[subject] + " Activity Worksheet";
+
+      document.getElementById("worksheetInfo").textContent =
+        "Age: " + age + " | Name: __________________ | Date: __________";
+
+      const questions = activities[subject][activity];
+      document.getElementById("questions").innerHTML = questions.map((q, i) =>
+        `<div class="question"><strong>${i + 1}. ${q}</strong><div class="answer"></div></div>`
+      ).join("");
+
+      document.getElementById("worksheet").style.display = "block";
+    }
+  </script>
+</body>
+</html>
