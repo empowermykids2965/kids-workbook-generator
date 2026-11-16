@@ -44,22 +44,34 @@
     .hint { color: #667085; font-size: 13px; margin: 6px 0 0; }
     #worksheet {
       margin-top: 30px;
-      padding: 24px;
-      border: 2px dashed #aab5dc;
-      border-radius: 12px;
+      padding: 34px;
+      border: 1px solid #d7deeb;
+      border-top: 7px solid #4257a5;
+      border-radius: 10px;
+      background: #fff;
       display: none;
+      color: #202b3c;
     }
-    #worksheet h2 { color: #4257a5; text-align: center; }
-    .worksheet-meta { text-align: center; color: #475467; }
-    .question { margin: 24px 0; page-break-inside: avoid; }
-    .answer { border-bottom: 1px solid #555; height: 30px; margin-top: 12px; }
-    .trace { font-size: 42px; letter-spacing: 12px; color: #aab5dc; font-weight: bold; margin-top: 12px; }
+    #worksheet h2 { color: #263b70; text-align: center; font-size: 25px; margin: 4px 0 18px; }
+    .worksheet-kicker { text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 11px; font-weight: bold; color: #667085; }
+    .worksheet-meta { color: #344054; border-top: 1px solid #d7deeb; border-bottom: 1px solid #d7deeb; padding: 12px 4px; line-height: 2; }
+    .directions { background: #f4f6fb; border-left: 3px solid #5268bd; padding: 11px 14px; font-size: 14px; margin: 18px 0 24px; }
+    .question { margin: 25px 0 30px; padding-bottom: 8px; page-break-inside: avoid; break-inside: avoid; }
+    .question strong { display: block; font-size: 15px; line-height: 1.6; }
+    .trace { font-size: 38px; letter-spacing: 9px; color: #aab5dc; font-weight: bold; margin: 16px 0; padding: 12px; border: 1px dashed #c6cee0; border-radius: 6px; }
+    .answer { height: 32px; margin-top: 13px; border-bottom: 1px solid #7b8494; }
+    .worksheet-footer { margin-top: 34px; padding-top: 12px; border-top: 1px solid #d7deeb; color: #667085; text-align: center; font-size: 11px; }
     .print-button { background: #16845b; }
+    @page { size: A4; margin: 16mm; }
     @media print {
-      body { background: white; padding: 0; }
+      body { background: white; padding: 0; color: #202b3c; }
       .container { box-shadow: none; max-width: none; padding: 0; }
       h1, .intro, .controls, .print-button { display: none !important; }
-      #worksheet { display: block !important; border: none; margin: 0; padding: 10px; }
+      #worksheet { display: block !important; border: none; border-top: 5px solid #263b70; border-radius: 0; margin: 0; padding: 12px 8px; }
+      .question { margin: 22px 0; }
+      .directions { background: #f4f6fb !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .trace { color: #9aa6c4 !important; }
+      .worksheet-footer { margin-top: 26px; }
     }
   </style>
 </head>
@@ -106,9 +118,12 @@
     </section>
 
     <section id="worksheet" aria-live="polite">
+      <p class="worksheet-kicker">Kids Learning Workbook</p>
       <h2 id="worksheetTitle">My Learning Worksheet</h2>
       <p id="worksheetInfo" class="worksheet-meta"></p>
+      <p class="directions"><strong>Instructions:</strong> Read each activity carefully. Take your time and do your best work.</p>
       <div id="questions"></div>
+      <p class="worksheet-footer">Great learning starts with practice • Keep trying!</p>
       <button class="print-button" type="button" onclick="window.print()">Print / Save as PDF</button>
     </section>
   </main>
@@ -258,7 +273,7 @@
 
       document.getElementById("worksheetTitle").textContent = title;
       document.getElementById("worksheetInfo").textContent =
-        "Age: " + age + "  |  Name: ____________________  |  Date: __________";
+        "Student: __________________________________    Date: __________________    Age group: " + age;
       questionsContainer.replaceChildren();
       selectedQuestions.forEach(addQuestion);
       worksheet.style.display = "block";
