@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kids Workbook Generator</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
       background: #f4f7ff;
@@ -14,59 +14,65 @@
       color: #26324b;
     }
     .container {
-      max-width: 700px;
+      max-width: 760px;
       margin: auto;
       background: white;
       padding: 30px;
-      border-radius: 16px;
+      border-radius: 18px;
       box-shadow: 0 4px 18px #00000012;
     }
-    h1 { color: #4257a5; text-align: center; }
-    p { text-align: center; }
+    h1 { color: #4257a5; text-align: center; margin-bottom: 8px; }
+    .intro { text-align: center; color: #667085; margin-top: 0; }
     label { display: block; margin-top: 18px; font-weight: bold; }
     select, button {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
-      border-radius: 8px;
+      border-radius: 9px;
       font-size: 16px;
     }
-    select { border: 1px solid #ccc; }
+    select { border: 1px solid #cbd2e1; background: white; color: #26324b; }
     button {
       border: none;
       background: #5268bd;
       color: white;
       cursor: pointer;
       margin-top: 22px;
+      font-weight: bold;
     }
     button:hover { background: #394d9b; }
+    .hint { color: #667085; font-size: 13px; margin: 6px 0 0; }
     #worksheet {
       margin-top: 30px;
-      padding: 20px;
+      padding: 24px;
       border: 2px dashed #aab5dc;
-      border-radius: 10px;
+      border-radius: 12px;
       display: none;
     }
-    .question { margin: 25px 0; }
-    .answer { border-bottom: 1px solid #555; height: 25px; }
+    #worksheet h2 { color: #4257a5; text-align: center; }
+    .worksheet-meta { text-align: center; color: #475467; }
+    .question { margin: 24px 0; page-break-inside: avoid; }
+    .answer { border-bottom: 1px solid #555; height: 30px; margin-top: 12px; }
+    .trace { font-size: 42px; letter-spacing: 12px; color: #aab5dc; font-weight: bold; margin-top: 12px; }
+    .print-button { background: #16845b; }
     @media print {
       body { background: white; padding: 0; }
-      .container { box-shadow: none; }
-      .controls, .print-button { display: none; }
-      #worksheet { display: block !important; border: none; }
+      .container { box-shadow: none; max-width: none; padding: 0; }
+      h1, .intro, .controls, .print-button { display: none !important; }
+      #worksheet { display: block !important; border: none; margin: 0; padding: 10px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <main class="container">
     <h1>My Kids Workbook Generator</h1>
-    <p>Create simple learning activities for children!</p>
+    <p class="intro">Create simple, printable learning activities for children.</p>
 
-    <div class="controls">
+    <section class="controls" aria-label="Worksheet settings">
       <label for="age">Choose child's age</label>
       <select id="age">
         <option>3–4 years</option>
-        <option>5–6 years</option>
+        <option selected>5–6 years</option>
         <option>7–8 years</option>
         <option>9–10 years</option>
       </select>
@@ -78,67 +84,188 @@
         <option value="english">English</option>
       </select>
 
-      <label for="activity">Choose an activity</label>
+      <div id="phonicsOptions">
+        <label for="phonicsSkill">Choose a phonics skill</label>
+        <select id="phonicsSkill">
+          <option value="letters">Letter recognition and tracing</option>
+          <option value="sounds">Beginning letter sounds</option>
+          <option value="cvc">CVC words (cat, sun, map)</option>
+          <option value="rhyming">Rhyming words</option>
+        </select>
+        <p class="hint">Start with letters, then practise sounds and simple words.</p>
+      </div>
+
+      <label for="activity">Choose an activity style</label>
       <select id="activity">
         <option value="writing">Writing practice</option>
         <option value="matching">Matching</option>
         <option value="thinking">Thinking questions</option>
       </select>
 
-      <button onclick="generateWorksheet()">Create My Worksheet</button>
-    </div>
+      <button id="createButton" type="button">Create My Worksheet</button>
+    </section>
 
-    <div id="worksheet">
+    <section id="worksheet" aria-live="polite">
       <h2 id="worksheetTitle">My Learning Worksheet</h2>
-      <p id="worksheetInfo"></p>
+      <p id="worksheetInfo" class="worksheet-meta"></p>
       <div id="questions"></div>
-      <button class="print-button" onclick="window.print()">Print / Save as PDF</button>
-    </div>
-  </div>
+      <button class="print-button" type="button" onclick="window.print()">Print / Save as PDF</button>
+    </section>
+  </main>
 
   <script>
+    const phonicsActivities = {
+      letters: {
+        writing: [
+          { prompt: "Trace the letters, then write them on your own.", trace: "A a   B b   C c", answer: true },
+          { prompt: "Write the missing letters: A, ___, C, ___, E.", answer: true },
+          { prompt: "Write one word that begins with the letter S.", answer: true }
+        ],
+        matching: [
+          { prompt: "Match A with Apple, B with Ball, and C with Cat." },
+          { prompt: "Circle the capital letter: a   B   c   d." },
+          { prompt: "Find and circle all the letter m's: n   m   w   m   h." }
+        ],
+        thinking: [
+          { prompt: "What is the first letter of your name?" },
+          { prompt: "Is G a capital letter or a small letter?" },
+          { prompt: "Can you name a word that begins with T?" }
+        ]
+      },
+      sounds: {
+        writing: [
+          { prompt: "Write the first sound you hear in: sun.", answer: true },
+          { prompt: "Complete the beginning sound: ___at (picture clue: cat).", answer: true },
+          { prompt: "Write one word that begins with the /b/ sound.", answer: true }
+        ],
+        matching: [
+          { prompt: "Match the beginning sounds: /m/ – moon, /s/ – sun, /f/ – fish." },
+          { prompt: "Circle the word that begins with /b/: ball, sun, cat." },
+          { prompt: "Which two words begin with the same sound: dog, duck, fish?" }
+        ],
+        thinking: [
+          { prompt: "What sound can you hear at the beginning of apple?" },
+          { prompt: "Name an animal that begins with the /d/ sound." },
+          { prompt: "Do sun and sock begin with the same sound?" }
+        ]
+      },
+      cvc: {
+        writing: [
+          { prompt: "Read and trace: cat   dog   sun.", trace: "cat   dog   sun", answer: true },
+          { prompt: "Fill in the missing vowel: c_t, p_n, s_n.", answer: true },
+          { prompt: "Write the word for a pet that says meow.", answer: true }
+        ],
+        matching: [
+          { prompt: "Match each word to its word family: cat, hat, mat / pin, win, fin." },
+          { prompt: "Find the word that rhymes with dog: log, sun, pen." },
+          { prompt: "Match the word to the correct beginning sound: map, bed, pig." }
+        ],
+        thinking: [
+          { prompt: "Which sounds do you hear in the word cat?" },
+          { prompt: "Change the first sound in cat to /b/. What new word do you make?" },
+          { prompt: "Can you think of another word that rhymes with sun?" }
+        ]
+      },
+      rhyming: {
+        writing: [
+          { prompt: "Write a word that rhymes with cat.", answer: true },
+          { prompt: "Complete the rhyming pair: sun, ___", answer: true },
+          { prompt: "Write two words that rhyme with cake.", answer: true }
+        ],
+        matching: [
+          { prompt: "Match the rhyming words: cat–hat, log–dog, bee–tree." },
+          { prompt: "Circle the word that rhymes with fish: dish, sun, car." },
+          { prompt: "Draw a line to match: light–night, bed–red, fox–box." }
+        ],
+        thinking: [
+          { prompt: "Do cake and make rhyme?" },
+          { prompt: "Which word rhymes with hen: pen or dog?" },
+          { prompt: "Can you say a silly sentence using two rhyming words?" }
+        ]
+      }
+    };
+
+    const otherActivities = {
+      math: {
+        writing: ["Write numbers from 1 to 10.", "Write the number after 5.", "Write the number before 9."],
+        matching: ["Match 1 with one star.", "Match 2 with two stars.", "Match 3 with three stars."],
+        thinking: ["What is 2 + 1?", "What is 5 - 2?", "Which is bigger: 4 or 7?"]
+      },
+      english: {
+        writing: ["Write your name.", "Write one sentence about a cat.", "Write three describing words."],
+        matching: ["Match happy with a smiling face.", "Match hot with the sun.", "Match cold with ice."],
+        thinking: ["Name three animals.", "What is your favourite colour?", "Make a sentence using the word book."]
+      }
+    };
+
+    const subjectNames = { phonics: "Phonics", math: "Math", english: "English" };
+    const skillNames = {
+      letters: "Letter Recognition and Tracing",
+      sounds: "Beginning Letter Sounds",
+      cvc: "CVC Words",
+      rhyming: "Rhyming Words"
+    };
+
+    const subjectSelect = document.getElementById("subject");
+    const phonicsOptions = document.getElementById("phonicsOptions");
+    const worksheet = document.getElementById("worksheet");
+    const questionsContainer = document.getElementById("questions");
+
+    subjectSelect.addEventListener("change", () => {
+      phonicsOptions.style.display = subjectSelect.value === "phonics" ? "block" : "none";
+    });
+
+    function addQuestion(question, index) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "question";
+      const heading = document.createElement("strong");
+      heading.textContent = (index + 1) + ". " + (typeof question === "string" ? question : question.prompt);
+      wrapper.appendChild(heading);
+
+      if (question && typeof question === "object" && question.trace) {
+        const trace = document.createElement("div");
+        trace.className = "trace";
+        trace.textContent = question.trace;
+        wrapper.appendChild(trace);
+      }
+      if (question && typeof question === "object" && question.answer) {
+        const answer = document.createElement("div");
+        answer.className = "answer";
+        wrapper.appendChild(answer);
+      } else {
+        const space = document.createElement("div");
+        space.className = "answer";
+        wrapper.appendChild(space);
+      }
+      questionsContainer.appendChild(wrapper);
+    }
+
     function generateWorksheet() {
       const age = document.getElementById("age").value;
-      const subject = document.getElementById("subject").value;
+      const subject = subjectSelect.value;
       const activity = document.getElementById("activity").value;
+      const skill = document.getElementById("phonicsSkill").value;
 
-      const activities = {
-        phonics: {
-          writing: ["Write the letter A.", "Write a word that starts with B.", "Complete: C _ T."],
-          matching: ["Match A with Apple.", "Match B with Ball.", "Match C with Cat."],
-          thinking: ["What sound does A make?", "Name a word beginning with B.", "Which word starts with C: Cat or Dog?"]
-        },
-        math: {
-          writing: ["Write numbers from 1 to 10.", "Write the number after 5.", "Write the number before 9."],
-          matching: ["Match 1 with one star.", "Match 2 with two stars.", "Match 3 with three stars."],
-          thinking: ["What is 2 + 1?", "What is 5 - 2?", "Which is bigger: 4 or 7?"]
-        },
-        english: {
-          writing: ["Write your name.", "Write one sentence about a cat.", "Write three describing words."],
-          matching: ["Match happy with a smiling face.", "Match hot with the sun.", "Match cold with ice."],
-          thinking: ["Name three animals.", "What is your favourite colour?", "Make a sentence using the word 'book'."]
-        }
-      };
+      let selectedQuestions;
+      let title = subjectNames[subject] + " Activity Worksheet";
 
-      const names = {
-        phonics: "Phonics",
-        math: "Math",
-        english: "English"
-      };
+      if (subject === "phonics") {
+        selectedQuestions = phonicsActivities[skill][activity];
+        title = "Phonics: " + skillNames[skill];
+      } else {
+        selectedQuestions = otherActivities[subject][activity];
+      }
 
-      document.getElementById("worksheetTitle").textContent =
-        names[subject] + " Activity Worksheet";
-
+      document.getElementById("worksheetTitle").textContent = title;
       document.getElementById("worksheetInfo").textContent =
-        "Age: " + age + " | Name: __________________ | Date: __________";
-
-      const questions = activities[subject][activity];
-      document.getElementById("questions").innerHTML = questions.map((q, i) =>
-        `<div class="question"><strong>${i + 1}. ${q}</strong><div class="answer"></div></div>`
-      ).join("");
-
-      document.getElementById("worksheet").style.display = "block";
+        "Age: " + age + "  |  Name: ____________________  |  Date: __________";
+      questionsContainer.replaceChildren();
+      selectedQuestions.forEach(addQuestion);
+      worksheet.style.display = "block";
+      worksheet.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+
+    document.getElementById("createButton").addEventListener("click", generateWorksheet);
   </script>
 </body>
 </html>
